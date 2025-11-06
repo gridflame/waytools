@@ -1,155 +1,49 @@
 'use client';
 
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import PasswordProtection from "./components/PasswordProtection";
 
 export default function Home() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const downloadAbortController = useRef<AbortController | null>(null);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (downloadAbortController.current) {
-        downloadAbortController.current.abort();
-      }
-    };
-  }, []);
-
-  const handleDownload = async () => {
-    // Prevent multiple simultaneous downloads
-    if (isDownloading) return;
+  const handleDownload = () => {
+    // Download directly from GitHub Releases - no CORS issues this way
+    // Browser will handle the download natively and show it's from GitHub
+    const githubOwner = process.env.NEXT_PUBLIC_GITHUB_OWNER || 'gridflame';
+    const githubRepo = process.env.NEXT_PUBLIC_GITHUB_REPO || 'waytools';
+    const githubTag = process.env.NEXT_PUBLIC_GITHUB_RELEASE_TAG || 'v1.0.0';
+    const filename = 'YouTubeDownloaderSetup.exe';
     
-    // Abort any existing download
-    if (downloadAbortController.current) {
-      downloadAbortController.current.abort();
-    }
+    // Direct GitHub Releases download URL
+    const githubUrl = `https://github.com/${githubOwner}/${githubRepo}/releases/download/${githubTag}/${filename}`;
     
+    // Set download state
     setIsDownloading(true);
     setError(null);
     setDownloadProgress(0);
     
-    try {
-      // Create new abort controller
-      downloadAbortController.current = new AbortController();
-      
-      // Download directly from GitHub Releases - browsers trust GitHub more
-      // This bypasses the proxy and downloads directly from github.com
-      const githubOwner = process.env.NEXT_PUBLIC_GITHUB_OWNER || 'gridflame';
-      const githubRepo = process.env.NEXT_PUBLIC_GITHUB_REPO || 'waytools';
-      const githubTag = process.env.NEXT_PUBLIC_GITHUB_RELEASE_TAG || 'v1.0.0';
-      const defaultFilename = 'YouTubeDownloaderSetup.exe';
-      
-      // Direct GitHub Releases download URL
-      const githubUrl = `https://github.com/${githubOwner}/${githubRepo}/releases/download/${githubTag}/${defaultFilename}`;
-      
-      const response = await fetch(githubUrl, {
-        signal: downloadAbortController.current.signal,
-        cache: 'no-store',
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Download failed: ${response.statusText}`);
+    // Create download link and trigger it
+    const link = document.createElement('a');
+    link.href = githubUrl;
+    link.download = filename;
+    link.target = '_blank'; // Open in new tab as fallback
+    link.style.display = 'none';
+    
+    // Add to DOM, click, then remove
+    document.body.appendChild(link);
+    link.click();
+    
+    // Cleanup
+    setTimeout(() => {
+      if (document.body.contains(link)) {
+        document.body.removeChild(link);
       }
-      
-      // Get content length for progress calculation
-      const contentLength = response.headers.get('content-length');
-      const total = contentLength ? parseInt(contentLength, 10) : 0;
-      
-      if (!response.body) {
-        throw new Error('No response body');
-      }
-      
-      const reader = response.body.getReader();
-      const chunks: Uint8Array[] = [];
-      let receivedLength = 0;
-      
-      // Read stream with progress tracking
-      // Use requestAnimationFrame to batch UI updates and prevent browser freezing
-      const updateProgress = () => {
-        if (total > 0 && receivedLength > 0) {
-          const progress = Math.min(99, Math.round((receivedLength / total) * 100));
-          setDownloadProgress(progress);
-        }
-      };
-      
-      let lastUpdate = 0;
-      const UPDATE_INTERVAL = 100; // Update UI every 100ms
-      
-      while (true) {
-        const { done, value } = await reader.read();
-        
-        if (done) break;
-        
-        chunks.push(value);
-        receivedLength += value.length;
-        
-        // Throttle progress updates to prevent UI freezing
-        const now = Date.now();
-        if (now - lastUpdate >= UPDATE_INTERVAL) {
-          updateProgress();
-          lastUpdate = now;
-          // Yield to browser to prevent freezing
-          await new Promise(resolve => setTimeout(resolve, 0));
-        }
-      }
-      
-      // Final progress update
-      setDownloadProgress(100);
-      
-      // Combine chunks into blob
-      // Type assertion needed due to TypeScript strictness with ArrayBufferLike
-      const blob = new Blob(chunks as BlobPart[], { type: 'application/octet-stream' });
-      
-      // Get filename from Content-Disposition header or default
-      const contentDisposition = response.headers.get('content-disposition');
-      let filename = 'YouTubeDownloaderSetup.exe';
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="?(.+?)"?$/i);
-        if (filenameMatch) {
-          filename = filenameMatch[1];
-        }
-      }
-      
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      link.style.display = 'none';
-      
-      // Trigger download
-      document.body.appendChild(link);
-      link.click();
-      
-      // Cleanup after a short delay
-      setTimeout(() => {
-        if (document.body.contains(link)) {
-          document.body.removeChild(link);
-        }
-        window.URL.revokeObjectURL(url);
-        setIsDownloading(false);
-      }, 200);
-      
-    } catch (error: any) {
-      // Don't show error if download was aborted
-      if (error.name === 'AbortError') {
-        setIsDownloading(false);
-        setDownloadProgress(0);
-        return;
-      }
-      
-      console.error('Download error:', error);
-      setError(error.message || 'Download failed. Please try again.');
       setIsDownloading(false);
-      setDownloadProgress(0);
-    } finally {
-      downloadAbortController.current = null;
-    }
+      setDownloadProgress(100); // Show completion
+    }, 500);
   };
 
   return (
