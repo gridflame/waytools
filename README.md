@@ -1,36 +1,153 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# way.tools - Premium Tools, Simplified
 
-## Getting Started
+A clean, password-protected platform for downloading premium tools. Currently featuring a YouTube downloader with clean installer.
 
-First, run the development server:
+## 🚀 Features
+
+- **Password Protection**: Site-wide password authentication (password: `apple123`)
+- **Clean Design**: Minimal, aesthetic single-page interface
+- **YouTube Downloader**: Full-featured YouTube video/audio downloader
+- **Clean Installer**: No bloatware, just the tool you need
+- **Multiple Formats**: MP4, WebM, MP3, M4A, WAV, FLAC
+- **Quality Selection**: Choose from 1080p to 240p
+
+## 📋 Prerequisites
+
+- Node.js 18+ and npm
+- Python 3.8+ (for building the executable)
+- Git (for deployment)
+
+## 🛠️ Local Development
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Build the YouTube Downloader Executable
+
+```bash
+cd youtube_downloader
+python build.py
+# or on Windows:
+build.bat
+```
+
+This creates `public/YouTubeDownloader.exe` which is used for downloads.
+
+### 3. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Password: `apple123`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📦 Building the Executable
 
-## Learn More
+The YouTube downloader is built using PyInstaller:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+cd youtube_downloader
+python build.py
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The build process:
+1. Installs Python dependencies (yt-dlp, pyinstaller, pillow)
+2. Copies logo.png from public folder
+3. Converts logo to ICO format for Windows
+4. Builds single-file executable
+5. Copies to `public/YouTubeDownloader.exe` for web download
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚀 Deployment
 
-## Deploy on Vercel
+### Deploy to Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **Push to GitHub:**
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git remote add origin https://github.com/YOUR_USERNAME/waytools.git
+   git push -u origin main
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2. **Connect to Vercel:**
+   - Go to [vercel.com](https://vercel.com)
+   - Import your GitHub repository
+   - Deploy automatically
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
+
+## 📁 Project Structure
+
+```
+.
+├── app/
+│   ├── api/download/          # Download API endpoint
+│   ├── components/            # React components
+│   │   └── PasswordProtection.tsx
+│   ├── page.tsx               # Main landing page
+│   └── layout.tsx             # Root layout
+├── public/
+│   ├── logo.png               # Site logo
+│   └── YouTubeDownloader.exe  # Built executable
+├── youtube_downloader/
+│   ├── main.py                # YouTube downloader app
+│   ├── build.py               # Build script
+│   ├── build.bat              # Windows build script
+│   └── requirements.txt       # Python dependencies
+└── vercel.json                # Vercel configuration
+```
+
+## 🎨 Customization
+
+### Change Password
+
+Edit `app/components/PasswordProtection.tsx`:
+```typescript
+const PASSWORD = 'your-password-here';
+```
+
+### Update Logo
+
+Replace `public/logo.png` with your logo (recommended: 512x512px PNG)
+
+### Add More Tools
+
+1. Add tool card in `app/page.tsx`
+2. Add download endpoint in `app/api/download/`
+3. Build new executable in `youtube_downloader/` or create new folder
+
+## 🔒 Security
+
+- Password is currently client-side only (for demo)
+- For production, implement server-side verification
+- Consider adding rate limiting
+- Use authentication tokens for downloads
+
+## 📝 License
+
+This project uses yt-dlp, which is licensed under the Unlicense.
+
+## ⚠️ Disclaimer
+
+This tool is for personal use only. Please respect YouTube's Terms of Service and copyright laws. Only download videos you have permission to download.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📧 Support
+
+For issues or questions, please open an issue on GitHub.
+
+---
+
+**way.tools** - Premium Tools, Simplified

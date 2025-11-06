@@ -1,0 +1,46 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    
+    - name: Install dependencies
+      run: |
+        cd youtube_downloader
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Build executable
+      run: |
+        cd youtube_downloader
+        python build.py
+    
+    - name: Create installer
+      run: |
+        cd youtube_downloader
+        "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" create_installer.iss
+      continue-on-error: true
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: youtube_downloader/installer/YouTubeDownloaderSetup.exe
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

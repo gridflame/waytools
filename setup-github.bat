@@ -1,0 +1,40 @@
+@echo off
+REM Setup GitHub remote for way.tools project
+
+echo GitHub Account Setup for way.tools
+echo ===================================
+echo.
+
+set /p GITHUB_USERNAME="Enter your GitHub username: "
+set /p GITHUB_EMAIL="Enter your GitHub email: "
+set /p REPO_NAME="Enter repository name (default: waytools): "
+
+if "%REPO_NAME%"=="" set REPO_NAME=waytools
+
+echo.
+echo Configuring Git...
+git config --global user.name "%GITHUB_USERNAME%"
+git config --global user.email "%GITHUB_EMAIL%"
+
+echo.
+echo Setting up remote...
+REM Remove existing remote if it exists
+git remote remove origin 2>nul
+
+REM Add new remote
+git remote add origin https://github.com/%GITHUB_USERNAME%/%REPO_NAME%.git
+
+echo.
+echo Configuration complete!
+echo.
+echo Next steps:
+echo 1. Create the repository '%REPO_NAME%' on GitHub (if it doesn't exist)
+echo 2. Push your code:
+echo    git add .
+echo    git commit -m "Initial commit"
+echo    git push -u origin main
+echo.
+echo Note: GitHub may ask for a Personal Access Token instead of password
+echo.
+pause
+
