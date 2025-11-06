@@ -36,10 +36,17 @@ export default function Home() {
       // Create new abort controller
       downloadAbortController.current = new AbortController();
       
-      // Download the executable with progress tracking
-      // Add timestamp to bypass cache
-      const timestamp = Date.now();
-      const response = await fetch(`/api/download?t=${timestamp}`, {
+      // Download directly from GitHub Releases - browsers trust GitHub more
+      // This bypasses the proxy and downloads directly from github.com
+      const githubOwner = process.env.NEXT_PUBLIC_GITHUB_OWNER || 'gridflame';
+      const githubRepo = process.env.NEXT_PUBLIC_GITHUB_REPO || 'waytools';
+      const githubTag = process.env.NEXT_PUBLIC_GITHUB_RELEASE_TAG || 'v1.0.0';
+      const defaultFilename = 'YouTubeDownloaderSetup.exe';
+      
+      // Direct GitHub Releases download URL
+      const githubUrl = `https://github.com/${githubOwner}/${githubRepo}/releases/download/${githubTag}/${defaultFilename}`;
+      
+      const response = await fetch(githubUrl, {
         signal: downloadAbortController.current.signal,
         cache: 'no-store',
       });
@@ -260,9 +267,17 @@ export default function Home() {
               )}
               
               {!isDownloading && !error && (
-                <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                  Clean installer • No bloatware • Safe & Secure
-                </p>
+                <div className="mt-4 space-y-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Clean installer • No bloatware • Safe & Secure
+                  </p>
+                  <div className="max-w-md mx-auto p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                    <p className="text-xs text-amber-800 dark:text-amber-300 text-center">
+                      <strong>Note:</strong> Downloads come directly from <a href="https://github.com/gridflame/waytools/releases" target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-900 dark:hover:text-amber-200">GitHub Releases</a>. 
+                      Your browser may still show a warning for unsigned executables - this is normal. Click "Keep" to download.
+                    </p>
+                  </div>
+                </div>
               )}
             </div>
           </div>

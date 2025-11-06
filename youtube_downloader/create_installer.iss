@@ -27,6 +27,9 @@ SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=x64
+; Code signing (uncomment and configure when you have a certificate)
+; SignTool=signtool sign /f "path\to\certificate.pfx" /p "password" /t http://timestamp.digicert.com /d "way.tools YouTube Downloader" /du "https://way.tools" $f
+; SignedUninstaller=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
