@@ -95,7 +95,8 @@ export default function Home() {
       setDownloadProgress(100);
       
       // Combine chunks into blob
-      const blob = new Blob(chunks, { type: 'application/octet-stream' });
+      // Type assertion needed due to TypeScript strictness with ArrayBufferLike
+      const blob = new Blob(chunks as BlobPart[], { type: 'application/octet-stream' });
       
       // Get filename from Content-Disposition header or default
       const contentDisposition = response.headers.get('content-disposition');
